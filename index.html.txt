@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Search Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #search-results {
+      margin-top: 20px;
+    }
+    .video-item {
+      margin-bottom: 10px;
+    }
+    .video-item a {
+      color: #1a73e8;
+      text-decoration: none;
+    }
+    .video-item a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>YouTube Search Tool</h1>
+  <input type="text" id="search-query" placeholder="Enter search query">
+  <input type="text" id="video-type" placeholder="Filter by type (e.g., tutorial)">
+  <button onclick="searchVideos()">Search</button>
+
+  <div id="search-results"></div>
+
+  <script>
+    const API_KEY = 'AIzaSyApa4rgEhYJyTURplGGRqOkNekxo_fUEig'; // AIzaSyApa4rgEhYJyTURplGGRqOkNekxo_fUEig
+
+    function searchVideos() {
+      const query = document.getElementById('search-query').value;
+      const videoType = document.getElementById('video-type').value;
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&type=video&key=${API_KEY}`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const results = data.items;
+          const filteredResults = results.filter(video => 
+            video.snippet.title.toLowerCase().includes(videoType.toLowerCase())
+          );
+          displayResults(filteredResults);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function displayResults(videos) {
+      const resultsDiv = document.getElementById('search-results');
+      resultsDiv.innerHTML = '';
+
+      if (videos.length === 0) {
+        resultsDiv.innerHTML = '<p>No videos found.</p>';
+        return;
+      }
+
+      videos.forEach(video => {
+        const videoId = video.id.videoId;
+        const title = video.snippet.title;
+        const thumbnail = video.snippet.thumbnails.default.url;
+
+        const videoItem = document.createElement('div');
+        videoItem.className = 'video-item';
+        videoItem.innerHTML = `
+          <a href="https://www.youtube.com/watch?v=${videoId}" target="_blank">
+            <img src="${thumbnail}" alt="${title}">
+            <p>${title}</p>
+          </a>
+        `;
+        resultsDiv.appendChild(videoItem);
+      });
+    }
+  </script>
+</body>
+</html>
